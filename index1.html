@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSync - Student Team Finder</title>
+    <style>
+        /* Simple CSS for a beginner-friendly project */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f2f2f2;
+            color: #222;
+        }
+
+        header {
+            background-color: #354b75;
+            color: white;
+            padding: 18px;
+            text-align: center;
+        }
+
+        nav {
+            background-color: #e0e0e0;
+            padding: 10px;
+            text-align: center;
+        }
+
+        nav button {
+            margin: 4px;
+            padding: 9px 12px;
+            border: 1px solid #999;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        nav button:hover {
+            background-color: #d5e2f5;
+        }
+
+        main {
+            max-width: 950px;
+            margin: 20px auto;
+            padding: 15px;
+        }
+
+        .page {
+            display: none;
+            background: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        h1, h2 {
+            color: #354b75;
+        }
+
+        input, select, textarea {
+            display: block;
+            width: 100%;
+            max-width: 500px;
+            box-sizing: border-box;
+            padding: 9px;
+            margin: 7px 0 14px;
+        }
+
+        .button {
+            padding: 9px 14px;
+            background-color: #354b75;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            padding: 12px;
+            margin: 10px 0;
+            background-color: #fafafa;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #e3e9f2;
+            padding: 4px 7px;
+            margin: 3px;
+            font-size: 13px;
+        }
+
+        .message {
+            color: green;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            color: #555;
+        }
+
+        @media (max-width: 600px) {
+            main {
+                margin: 8px;
+                padding: 5px;
+            }
+
+            nav button {
+                width: 45%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SkillSync</h1>
+        <p>Find students to work with and learn new skills</p>
+    </header>
+
+    <nav>
+        <button onclick="showPage('dashboard')">Home</button>
+        <button onclick="showPage('matches')">Find Matches</button>
+        <button onclick="showPage('students')">Students</button>
+        <button onclick="showPage('profile')">My Profile</button>
+        <button onclick="showPage('opportunities')">Opportunities</button>
+    </nav>
+
+    <main>
+        <section class="page active" id="dashboard">
+            <h2>Welcome to SkillSync!</h2>
+            <p>This website helps students find teammates with different skills.</p>
+            <p><b>Number of students:</b> <span id="studentCount">0</span></p>
+            <p><b>Number of opportunities:</b> <span id="opportunityCount">0</span></p>
+            <button class="button" onclick="showPage('matches')">Find a teammate</button>
+
+            <h2>Some students</h2>
+            <div id="homeStudents"></div>
+        </section>
+
+        <section class="page" id="matches">
+            <h2>Find Matches</h2>
+            <p>Search for students by name, skill, or area of interest.</p>
+            <input id="matchSearch" type="text" placeholder="Example: Python">
+            <button class="button" onclick="searchMatches()">Search</button>
+            <button onclick="document.getElementById('matchSearch').value=''; searchMatches();">Clear</button>
+            <div id="matchResults"></div>
+        </section>
+
+        <section class="page" id="students">
+            <h2>All Students</h2>
+            <input id="studentSearch" type="text" placeholder="Search students..." oninput="showStudents()">
+            <div id="studentList"></div>
+        </section>
+
+        <section class="page" id="profile">
+            <h2>My Profile</h2>
+            <p>Enter your details below.</p>
+            <form id="profileForm">
+                <label for="name">Your name</label>
+                <input id="name" type="text" value="Sam Carter" required>
+
+                <label for="domain">Main area of interest</label>
+                <select id="domain">
+                    <option>Web Development</option>
+                    <option>Artificial Intelligence</option>
+                    <option>Data Science</option>
+                    <option>Cybersecurity</option>
+                    <option>App Development</option>
+                    <option>Design</option>
+                </select>
+
+                <label for="skills">Skills you have (separate with commas)</label>
+                <input id="skills" type="text" value="HTML, CSS">
+
+                <label for="learn">Skills you want to learn</label>
+                <input id="learn" type="text" value="JavaScript, Python">
+
+                <label for="bio">About you</label>
+                <textarea id="bio" rows="4" placeholder="Write a little about yourself"></textarea>
+
+                <button class="button" type="submit">Save Profile</button>
+            </form>
+            <p id="profileMessage" class="message"></p>
+        </section>
+
+        <section class="page" id="opportunities">
+            <h2>Opportunities</h2>
+            <p>Here are a few example activities for students.</p>
+            <div id="opportunityList"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>SkillSync Student Project</p>
+    </footer>
+
+    <script>
+        // Sample student data
+        var students = [
+            { name: "Aarav Sharma", domain: "Web Development", skills: ["HTML", "CSS", "JavaScript"], bio: "I like making websites." },
+            { name: "Priya Verma", domain: "Artificial Intelligence", skills: ["Python", "Machine Learning"], bio: "I am interested in AI projects." },
+            { name: "Rohan Singh", domain: "Data Science", skills: ["Python", "SQL", "Excel"], bio: "I enjoy working with data." },
+            { name: "Meera Patel", domain: "Design", skills: ["Figma", "UI Design", "Drawing"], bio: "I like designing easy-to-use apps." },
+            { name: "Kabir Khan", domain: "Cybersecurity", skills: ["Linux", "Networking"], bio: "I want to learn more about online security." }
+        ];
+
+        var opportunities = [
+            { title: "Student Hackathon", type: "Hackathon", description: "Work in a team and build a small project." },
+            { title: "Coding Challenge", type: "Competition", description: "Practise your programming skills." },
+            { title: "Web Development Course", type: "Learning", description: "Learn the basics of making websites." },
+            { title: "Student Scholarship", type: "Scholarship", description: "Look for scholarships available to students." }
+        ];
+
+        // Change the visible page
+        function showPage(pageName) {
+            var pages = document.getElementsByClassName("page");
+
+            for (var i = 0; i < pages.length; i++) {
+                pages[i].classList.remove("active");
+            }
+
+            document.getElementById(pageName).classList.add("active");
+        }
+
+        // Make a student card
+        function makeStudentCard(student) {
+            var skillsText = "";
+
+            for (var i = 0; i < student.skills.length; i++) {
+                skillsText += '<span class="tag">' + student.skills[i] + '</span>';
+            }
+
+            return '<div class="card">' +
+                '<h3>' + student.name + '</h3>' +
+                '<p><b>Area:</b> ' + student.domain + '</p>' +
+                '<p><b>Skills:</b> ' + skillsText + '</p>' +
+                '<p>' + student.bio + '</p>' +
+                '</div>';
+        }
+
+        // Show all students, or filter by search text
+        function showStudents() {
+            var searchBox = document.getElementById("studentSearch");
+            var searchText = searchBox ? searchBox.value.toLowerCase() : "";
+            var output = "";
+
+            for (var i = 0; i < students.length; i++) {
+                var studentText = students[i].name + " " + students[i].domain + " " +
+                    students[i].skills.join(" ") + " " + students[i].bio;
+
+                if (studentText.toLowerCase().indexOf(searchText) !== -1) {
+                    output += makeStudentCard(students[i]);
+                }
+            }
+
+            document.getElementById("studentList").innerHTML = output;
+        }
+
+        // Search students on the matches page
+        function searchMatches() {
+            var searchText = document.getElementById("matchSearch").value.toLowerCase();
+            var output = "";
+
+            for (var i = 0; i < students.length; i++) {
+                var studentText = students[i].name + " " + students[i].domain + " " +
+                    students[i].skills.join(" ") + " " + students[i].bio;
+
+                if (studentText.toLowerCase().indexOf(searchText) !== -1) {
+                    output += makeStudentCard(students[i]);
+                }
+            }
+
+            if (output === "") {
+                output = "<p>No students found. Try another search.</p>";
+            }
+
+            document.getElementById("matchResults").innerHTML = output;
+        }
+
+        // Show example opportunities
+        function showOpportunities() {
+            var output = "";
+
+            for (var i = 0; i < opportunities.length; i++) {
+                output += '<div class="card">' +
+                    '<h3>' + opportunities[i].title + '</h3>' +
+                    '<p><b>Type:</b> ' + opportunities[i].type + '</p>' +
+                    '<p>' + opportunities[i].description + '</p>' +
+                    '</div>';
+            }
+
+            document.getElementById("opportunityList").innerHTML = output;
+        }
+
+        // Save the profile in this browser
+        document.getElementById("profileForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            var profile = {
+                name: document.getElementById("name").value,
+                domain: document.getElementById("domain").value,
+                skills: document.getElementById("skills").value,
+                learn: document.getElementById("learn").value,
+                bio: document.getElementById("bio").value
+            };
+
+            localStorage.setItem("skillSyncProfile", JSON.stringify(profile));
+            document.getElementById("profileMessage").textContent = "Profile saved in this browser!";
+        });
+
+        // Load the saved profile if one exists
+        function loadProfile() {
+            var savedProfile = localStorage.getItem("skillSyncProfile");
+
+            if (savedProfile) {
+                var profile = JSON.parse(savedProfile);
+                document.getElementById("name").value = profile.name;
+                document.getElementById("domain").value = profile.domain;
+                document.getElementById("skills").value = profile.skills;
+                document.getElementById("learn").value = profile.learn;
+                document.getElementById("bio").value = profile.bio;
+            }
+        }
+
+        // Set up the page when it first opens
+        document.getElementById("studentCount").textContent = students.length;
+        document.getElementById("opportunityCount").textContent = opportunities.length;
+
+        var homeOutput = "";
+        for (var i = 0; i < 3; i++) {
+            homeOutput += makeStudentCard(students[i]);
+        }
+        document.getElementById("homeStudents").innerHTML = homeOutput;
+
+        showStudents();
+        searchMatches();
+        showOpportunities();
+        loadProfile();
+    </script>
+</body>
+</html>
